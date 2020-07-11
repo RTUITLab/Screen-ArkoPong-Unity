@@ -10,6 +10,7 @@ public class inputButtons : MonoBehaviourPunCallbacks
     [SerializeField] private float speed;
     [SerializeField] private syncBtn syncBtn;
     [SerializeField] private GameObject[] Players;
+    private syncPlatform SyncPlatform;
     private GameObject myPlatform;
     private Transform platformTransform;
     private bool holdButtonUp = false;
@@ -39,6 +40,7 @@ public class inputButtons : MonoBehaviourPunCallbacks
     private void MoveBall(int direction)  //1 - вверх, -1 - вниз
     {
         platformTransform.Translate(Vector3.up * direction * speed);
+        SyncPlatform.SendPositon();
         Debug.Log("local ball move");
     }
 
@@ -77,5 +79,13 @@ public class inputButtons : MonoBehaviourPunCallbacks
     {
         myPlatform = platform;
         platformTransform = myPlatform.transform;
+        try
+        {
+            SyncPlatform = myPlatform.GetComponent<syncPlatform>();
+        }
+        catch
+        {
+            Debug.LogError("Cant get platorm sync script");
+        }
     }
 }

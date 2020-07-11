@@ -9,25 +9,31 @@ public class syncPlatform : MonoBehaviour
 {
     private PhotonView photonView;
     private Transform transform;
-    private Vector3 lastTransform;
+    private Vector3 moveTo;
+    private float speed = 5f; 
+
     void Start()
     {
         photonView = gameObject.GetComponent<PhotonView>();
         transform = gameObject.transform;
+        moveTo = transform.position;
+    }
+    void Update()
+    {
+        if (transform.position.y != moveTo.y && Vector3.Distance(transform.position, moveTo) > 0.1f) //Сглаживание передвижения
+        {
+            Vector3 direction = (moveTo - transform.position).normalized;
+            transform.Translate(Time.deltaTime * direction * speed); 
+        }
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    public void SendPositon()
     {
-        if(lastTransform != transform.position)
-        {
-            photonView.RPC("SyncPos", RpcTarget.All, transform.position.x, transform.position.y);
-        }
+        photonView.RPC("SyncPos", RpcTarget.All, transform.position.x, transform.position.y);
     }
 
     [PunRPC] private void SyncPos(float x, float y)
     {
-        transform.position = new Vector3(x, y, 0);
-        lastTransform = transform.position;
+        moveTo = new Vector3(x, y, 0);
     }
 }
