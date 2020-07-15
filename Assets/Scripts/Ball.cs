@@ -42,7 +42,6 @@ public class Ball : MonoBehaviourPunCallbacks
             }
             else if (other.collider.tag == "Player")
             {
-                Debug.Log("Удар о игрока");
                 direction.x *= -1;
             }
             ChangeDirection();

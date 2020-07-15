@@ -10,7 +10,8 @@ public class syncPlatform : MonoBehaviour
     private PhotonView photonView;
     private Transform transform;
     private Vector3 moveTo;
-    private float speed = 5f; 
+    private float speed = 5f;
+    private int collisionStatus = 0;
 
     void Start()
     {
@@ -35,5 +36,38 @@ public class syncPlatform : MonoBehaviour
     [PunRPC] private void SyncPos(float x, float y)
     {
         moveTo = new Vector3(x, y, 0);
+    }
+
+    public void PlatformMove(int direction)
+    {
+        if (direction != collisionStatus)
+        {
+            transform.Translate(Vector3.up * direction * 0.1f);
+            SendPositon();
+            return;
+        }
+        Debug.LogError("Незя так двигаться");
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log(collision.gameObject.name);
+        if (collision.collider.name == "TopWall")
+        {
+            collisionStatus = 1;
+        }
+        else if(collision.collider.name == "BottomWall")
+        {
+            collisionStatus = -1;
+        }
+        Debug.Log(collision.gameObject.tag);
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.collider.name == "TopWall" || collision.collider.name == "BottomWall")
+        {
+            collisionStatus = 1;
+        }
     }
 }

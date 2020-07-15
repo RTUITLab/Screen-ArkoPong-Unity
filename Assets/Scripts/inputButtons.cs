@@ -12,13 +12,10 @@ public class inputButtons : MonoBehaviourPunCallbacks
     [SerializeField] private GameObject[] Players;
     private syncPlatform SyncPlatform;
     private GameObject myPlatform;
-    private Transform platformTransform;
     private bool holdButtonUp = false;
     private bool holdButtonDown = false;
-    private int actNum;
     public void Start()
     {
-        actNum = PhotonNetwork.LocalPlayer.ActorNumber - 2;
         if (PhotonNetwork.IsMasterClient)
         {
             gameObject.SetActive(false);
@@ -29,19 +26,12 @@ public class inputButtons : MonoBehaviourPunCallbacks
     {
         if (holdButtonUp)
         {
-            MoveBall(1);
+            SyncPlatform.PlatformMove(1);
         }
         if (holdButtonDown)
         {
-            MoveBall(-1);
+            SyncPlatform.PlatformMove(-1);
         }
-    }
-
-    private void MoveBall(int direction)  //1 - вверх, -1 - вниз
-    {
-        platformTransform.Translate(Vector3.up * direction * speed);
-        SyncPlatform.SendPositon();
-        Debug.Log("local ball move");
     }
 
     public void down(bool isUp)
@@ -71,14 +61,13 @@ public class inputButtons : MonoBehaviourPunCallbacks
     public void leaveBtn()
     {
         PhotonNetwork.LeaveRoom();
-        //PhotonNetwork.Disconnect();
-        SceneManager.LoadScene(2);
+        PhotonNetwork.Disconnect();
+        SceneManager.LoadScene(1);
     }
 
     public void SetMyPlatform(GameObject platform)
     {
         myPlatform = platform;
-        platformTransform = myPlatform.transform;
         try
         {
             SyncPlatform = myPlatform.GetComponent<syncPlatform>();
