@@ -16,19 +16,23 @@ public class Ball : MonoBehaviourPunCallbacks
     {
         direction = new Vector2(Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f));
         rigidbody = gameObject.GetComponent<Rigidbody>();
+
+        gameObject.transform.rotation = new Quaternion(0, 0, Random.Range(0, 1f), Quaternion.identity.w);
+        rigidbody.AddForce(Vector3.up * speed);
+        ChangeDirection();
     }
 
     public void OnCollisionEnter(Collision other)
     {
-        if(PhotonNetwork.IsMasterClient)
-        {
+        //if(PhotonNetwork.IsMasterClient)
+        //{
             if (other.collider.name == "TopWall" || other.collider.name == "BottomWall")
             {
-                direction.y *= -1;
+                direction.y *= -1 * Random.Range(0.3f, 0.7f);
             }
             else if (other.collider.name == "LeftWall" || other.collider.name == "RightWall")
             {
-                direction.x *= -1;
+                direction.x *= -1 * Random.Range(0.3f, 0.7f);
                 if (other.collider.name == "LeftWall")
                 {
                     textScore.AddRight();
@@ -42,10 +46,10 @@ public class Ball : MonoBehaviourPunCallbacks
             }
             else if (other.collider.tag == "Player")
             {
-                direction.x *= -1;
+                direction.x *= -1 * Random.Range(0.3f, 0.7f);
             }
             ChangeDirection();
-        }
+        //}
     }
 
     private void ChangeDirection()
@@ -53,13 +57,14 @@ public class Ball : MonoBehaviourPunCallbacks
         rigidbody.velocity = direction.normalized * speed;
     }
 
-    public override void OnPlayerEnteredRoom(Player newPlayer)
-    {
-        if(PhotonNetwork.CurrentRoom.PlayerCount == 3 && PhotonNetwork.IsMasterClient)
-        {
-            gameObject.transform.rotation = new Quaternion(0, 0, Random.Range(0, 1f), Quaternion.identity.w);
-            rigidbody.AddForce(Vector3.up * speed);
-            ChangeDirection();
-        }
-    }
+    //public override void OnPlayerEnteredRoom(Player newPlayer)
+    //{
+    //    if(PhotonNetwork.CurrentRoom.PlayerCount == 3 && PhotonNetwork.IsMasterClient)
+    //    {
+    //        gameObject.transform.rotation = new Quaternion(0, 0, Random.Range(0, 1f), Quaternion.identity.w);
+    //        rigidbody.AddForce(Vector3.up * speed);
+    //        ChangeDirection();
+    //    }
+    //}
+
 }
