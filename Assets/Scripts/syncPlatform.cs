@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(PhotonView))]
 public class syncPlatform : MonoBehaviour
 {
@@ -43,6 +44,12 @@ public class syncPlatform : MonoBehaviour
         if (direction != collisionStatus)
         {
             transform.Translate(Vector3.up * direction * 0.1f);
+
+            // Так как платформа должна иметь компонент RigidBody2D, то двигать ее с помощью Translate нельзя, иначе начнется будут траблы с физикой и отскоком мяча
+            // Поэтому нужно использовать метод:
+            // GetComponent<Rigidbody2D>().AddForce(Vector2.up * direction * 0.1f);
+            // Потестить пока не успел, но должно работать
+
             SendPositon();
             return;
         }

@@ -5,66 +5,30 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEditor;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Rigidbody2D))]
 public class Ball : MonoBehaviourPunCallbacks
 {
     [SerializeField] private int speed = 0;
     [SerializeField] private TextScore textScore;
-    private Rigidbody rigidbody;
-    private Vector2 direction;
-    void Start()
-    {
-        direction = new Vector2(Random.Range(0.1f, 0.9f), Random.Range(0.1f, 0.9f));
-        rigidbody = gameObject.GetComponent<Rigidbody>();
 
-        gameObject.transform.rotation = new Quaternion(0, 0, Random.Range(0, 1f), Quaternion.identity.w);
-        rigidbody.AddForce(Vector3.up * speed);
-        ChangeDirection();
+    public BallController controller;
+
+    //Массив возможных сил, которые рандомно назначаются объекту при начале игры или же полсе пропущенного гола
+    private Vector2[] initialForces = {new Vector2(100f, 100f), new Vector2(-100f, -100f), new Vector2(-100f, 100f), new Vector2(100f, -100f)};
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // При попадании в левую и правую стены ставим мяч в центр и снова запускаем
+        if(collision.gameObject.name == "LeftWall" || collision.gameObject.name == "RightWall")
+        {
+            controller.ballDestroyed();
+            Destroy(gameObject);
+        }
     }
 
-    public void OnCollisionEnter(Collision other)
+    public void addForce()
     {
-        //if(PhotonNetwork.IsMasterClient)
-        //{
-            if (other.collider.name == "TopWall" || other.collider.name == "BottomWall")
-            {
-                direction.y *= -1 * Random.Range(0.3f, 0.7f);
-            }
-            else if (other.collider.name == "LeftWall" || other.collider.name == "RightWall")
-            {
-                direction.x *= -1 * Random.Range(0.3f, 0.7f);
-                if (other.collider.name == "LeftWall")
-                {
-                    textScore.AddRight();
-                }
-                else if (other.collider.name == "RightWall")
-                {
-                    textScore.AddLeft();
-                }
-                transform.position = new Vector2(0, 0);
-                direction = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, -1f));
-            }
-            else if (other.collider.tag == "Player")
-            {
-                direction.x *= -1 * Random.Range(0.3f, 0.7f);
-            }
-            ChangeDirection();
-        //}
+        //Выбираем одну из сил, которые также задают траекторию движения (Random.Range(int,int) берет правую границу не включительно)
+        GetComponent<Rigidbody2D>().AddForce(initialForces[Random.Range(0, 4)]);
     }
-
-    private void ChangeDirection()
-    {
-        rigidbody.velocity = direction.normalized * speed;
-    }
-
-    //public override void OnPlayerEnteredRoom(Player newPlayer)
-    //{
-    //    if(PhotonNetwork.CurrentRoom.PlayerCount == 3 && PhotonNetwork.IsMasterClient)
-    //    {
-    //        gameObject.transform.rotation = new Quaternion(0, 0, Random.Range(0, 1f), Quaternion.identity.w);
-    //        rigidbody.AddForce(Vector3.up * speed);
-    //        ChangeDirection();
-    //    }
-    //}
-
 }
