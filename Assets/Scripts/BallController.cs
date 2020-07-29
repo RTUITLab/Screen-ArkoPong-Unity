@@ -23,7 +23,7 @@ public class BallController : MonoBehaviour
 
     public void ballDestroyed()
     {
-        instance[indx%instance.Length] = Instantiate(ball1Prefab, new Vector3(0, 0), Quaternion.Euler(0f, 0f, 0f));
+        instance[indx % instance.Length] = Instantiate(ball1Prefab, new Vector3(0, 0), Quaternion.Euler(0f, 0f, 0f));
         instance[indx % instance.Length].GetComponent<Ball>().addForce();
         instance[indx % instance.Length].GetComponent<Ball>().controller = this;
         indx++;
