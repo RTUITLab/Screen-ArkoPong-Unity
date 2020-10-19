@@ -16,10 +16,8 @@ public class Network : MonoBehaviourPunCallbacks
     [SerializeField] private Transform[] spawns;
     [SerializeField] private GameObject[] objTV;
     [SerializeField] private GameObject[] objPhone;
-    [SerializeField] private inputButtons buttons;
-    [SerializeField] private Ball ball;
     [SerializeField] private Camera camera;
-    private static bool played = false;
+    public static bool gameStart { private set; get; }
 
     void Start()
     {
@@ -74,6 +72,8 @@ public class Network : MonoBehaviourPunCallbacks
         }
         else if (!PhotonNetwork.IsMasterClient)
         {
+            GameObject platform = PhotonNetwork.Instantiate(platformPlayer.name, spawns[PhotonNetwork.CurrentRoom.PlayerCount - 2].position, Quaternion.identity);
+
             for (int i = 0; i < objTV.Length; ++i)
             {
                 objTV[i].SetActive(false);
@@ -82,13 +82,11 @@ public class Network : MonoBehaviourPunCallbacks
             {
                 objPhone[i].SetActive(true);
             }
-        }
 
-        if (PhotonNetwork.LocalPlayer.ActorNumber != 1)
-        {
-            GameObject platform = PhotonNetwork.Instantiate(platformPlayer.name, spawns[3 - PhotonNetwork.LocalPlayer.ActorNumber].position, Quaternion.identity);
-            buttons.SetMyPlatform(platform);
-            played = true;
+            if (PhotonNetwork.CurrentRoom.PlayerCount == 3)
+            {
+                gameStart = true;
+            }
         }
     }
 
@@ -97,6 +95,8 @@ public class Network : MonoBehaviourPunCallbacks
         Debug.Log($"Count ppl in room {PhotonNetwork.CurrentRoom.PlayerCount}");
         if (PhotonNetwork.CurrentRoom.PlayerCount == 3)
         {
+            gameStart = true;
+            PhotonNetwork.CurrentRoom.IsVisible = false;
             for (int i = 0; i < objTV.Length; ++i)
             {
                 objTV[i].SetActive(false);

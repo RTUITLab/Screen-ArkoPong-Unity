@@ -18,11 +18,13 @@ public class PhysicPlatform : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKey(KeyCode.W) && !collisionUp)
+        if (!Network.gameStart) { return; }
+
+        if (inputButtons.moveDirection == MoveDirection.Up && !collisionUp)
         {
             rigidbody.velocity = new Vector2(0f,10f);
         }
-        else if (Input.GetKey(KeyCode.S) && !collisionDown)
+        else if (inputButtons.moveDirection == MoveDirection.Down && !collisionDown)
         {
             rigidbody.velocity = new Vector2(0f, -10f);
         }

@@ -7,13 +7,14 @@ using UnityEngine.SceneManagement;
 
 public class inputButtons : MonoBehaviourPunCallbacks
 {
-    [SerializeField] private float speed;
-    [SerializeField] private syncBtn syncBtn;
-    [SerializeField] private GameObject[] Players;
-    private syncPlatform SyncPlatform;
-    private GameObject myPlatform;
-    private bool holdButtonUp = false;
-    private bool holdButtonDown = false;
+    public static MoveDirection moveDirection { private set; get; }
+
+
+    private void Awake()
+    {
+        moveDirection = MoveDirection.Stay;
+    }
+
     public void Start()
     {
         if (PhotonNetwork.IsMasterClient)
@@ -22,27 +23,15 @@ public class inputButtons : MonoBehaviourPunCallbacks
         }
     }
 
-    void FixedUpdate()
-    {
-        if (holdButtonUp)
-        {
-            SyncPlatform.PlatformMove(1);
-        }
-        if (holdButtonDown)
-        {
-            SyncPlatform.PlatformMove(-1);
-        }
-    }
-
     public void down(bool isUp)
     {
-        if (isUp) 
+        if (isUp)
         {
-            holdButtonUp = true;
+            moveDirection = MoveDirection.Down;
         }
         else
         {
-            holdButtonDown = true;
+            moveDirection = MoveDirection.Stay;
         }
     }
 
@@ -50,11 +39,11 @@ public class inputButtons : MonoBehaviourPunCallbacks
     {
         if (isUp)
         {
-            holdButtonUp = false;
+            moveDirection = MoveDirection.Up;
         }
         else
         {
-            holdButtonDown = false;
+            moveDirection = MoveDirection.Stay;
         }
     }
 
@@ -63,18 +52,5 @@ public class inputButtons : MonoBehaviourPunCallbacks
         PhotonNetwork.LeaveRoom();
         PhotonNetwork.Disconnect();
         SceneManager.LoadScene(1);
-    }
-
-    public void SetMyPlatform(GameObject platform)
-    {
-        myPlatform = platform;
-        try
-        {
-            SyncPlatform = myPlatform.GetComponent<syncPlatform>();
-        }
-        catch
-        {
-            Debug.LogError("Cant get platorm sync script");
-        }
     }
 }
