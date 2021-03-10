@@ -5,10 +5,14 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.AspNetCore.SignalR.Client;
 
 public class Network : MonoBehaviourPunCallbacks
 {
+    private static HubConnection hubConnection;
     [SerializeField] private bool isTvBild = false;
     [SerializeField] private GameObject platformPlayer;
     [SerializeField] private string version = "1.0";
@@ -21,6 +25,13 @@ public class Network : MonoBehaviourPunCallbacks
 
     void Start()
     {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("https://localhost:44316/zoom").Build();
+        Connect();
+        hubConnection.On<bool>("Kill", (stat) => Debug.Log(stat));
+        Thread.Sleep(5000);
+        hubConnection.SendAsync("Kill");
+        
         if (!isTvBild)
         {
             camera.cullingMask = 0;
@@ -36,6 +47,11 @@ public class Network : MonoBehaviourPunCallbacks
             PhotonNetwork.AutomaticallySyncScene = true;
             PhotonNetwork.ConnectUsingSettings();
         }
+    }
+
+    private static async Task Connect() //Connect to server.
+    {
+        await hubConnection.StartAsync();
     }
 
     public override void OnConnectedToMaster()
