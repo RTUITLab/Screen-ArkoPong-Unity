@@ -1,12 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;
-using Photon.Realtime;
 using UnityEditor;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class Ball : MonoBehaviourPunCallbacks
+public class Ball : MonoBehaviour
 {
     [SerializeField] private int speed = 0;
     [SerializeField] private TextScore textScore;

@@ -5,33 +5,39 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PhysicPlatform : MonoBehaviour
 {
-    Rigidbody2D rigidbody;
-    Vector2 velocity = new Vector2(0f, 0f);
-    bool collisionDown;
-    bool collisionUp;
+    private MoveDirection currDirection = MoveDirection.Stay;
+    private Rigidbody2D rigidbody;
+    private bool collisionDown;
+    private bool collisionUp;
 
+    private Vector2 upVector2Vel = new Vector2(0f, 10f);
+    private Vector2 downVector2Vel = new Vector2(0f, -10f);
+    private Vector2 stayVector2Vel = new Vector2(0,0);
+    private Vector3 startPos;
 
-    void Start()
+    private void Awake()
     {
         rigidbody = GetComponent<Rigidbody2D>();
+        startPos = gameObject.transform.position;
     }
 
-    void Update()
+    private void Update()
     {
         if (!Network.gameStart) { return; }
+        rigidbody.velocity = GetCurrentVelocity();
+    }
 
-        if (inputButtons.moveDirection == MoveDirection.Up && !collisionUp)
+    private Vector2 GetCurrentVelocity()
+    {
+        if (currDirection == MoveDirection.Up && !collisionUp)
         {
-            rigidbody.velocity = new Vector2(0f,10f);
+            return upVector2Vel;
         }
-        else if (inputButtons.moveDirection == MoveDirection.Down && !collisionDown)
+        else if (currDirection == MoveDirection.Down && !collisionDown)
         {
-            rigidbody.velocity = new Vector2(0f, -10f);
+            return downVector2Vel;
         }
-        else
-        {
-            rigidbody.velocity = new Vector2(0f, 0f);
-        }
+        return stayVector2Vel;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -58,5 +64,15 @@ public class PhysicPlatform : MonoBehaviour
         {
             collisionUp = false;
         }
+    }
+
+    public void SetDirection(MoveDirection direction)
+    {
+        currDirection = direction;
+    }
+
+    public void Reset()
+    {
+        gameObject.transform.position = startPos;
     }
 }

@@ -273,8 +273,6 @@ GameObject:
   - component: {fileID: 8108186936422251592}
   - component: {fileID: 8108186936422251599}
   - component: {fileID: 8108186936422251593}
-  - component: {fileID: 8102502646246801359}
-  - component: {fileID: 290417125260972807}
   m_Layer: 0
   m_Name: Space Platform
   m_TagString: Untagged
@@ -408,43 +406,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4a11d867d32ac54580e49d88ab08ff3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &8102502646246801359
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8108186936422251636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ObservedComponentsFoldoutOpen: 1
-  Group: 0
-  prefixField: -1
-  Synchronization: 3
-  OwnershipTransfer: 0
-  ObservedComponents:
-  - {fileID: 290417125260972807}
-  viewIdField: 0
-  InstantiationId: 0
-  isRuntimeInstantiated: 0
---- !u!114 &290417125260972807
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8108186936422251636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 0
-  m_SynchronizeScale: 0
 --- !u!1 &8108186936466007757
 GameObject:
   m_ObjectHideFlags: 0

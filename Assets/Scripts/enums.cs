@@ -1,6 +1,6 @@
 ﻿public enum MoveDirection
 {
-    Stay,
-    Up,
-    Down
+    Stay = 0,
+    Up = 1,
+    Down = -1
 }

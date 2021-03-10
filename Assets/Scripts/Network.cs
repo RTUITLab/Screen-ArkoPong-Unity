@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;
-using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using System.ComponentModel;
 using System.Threading;
@@ -10,139 +8,56 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.SignalR.Client;
 
-public class Network : MonoBehaviourPunCallbacks
+public class Network : MonoBehaviour
 {
     private static HubConnection hubConnection;
-    [SerializeField] private bool isTvBild = false;
-    [SerializeField] private GameObject platformPlayer;
-    [SerializeField] private string version = "1.0";
-    [SerializeField] private string nameTV = "tv";
+    private string tvID = null;
+    [SerializeField] private TextScore textScore;
+    [SerializeField] private string URL;
     [SerializeField] private Transform[] spawns;
-    [SerializeField] private GameObject[] objTV;
-    [SerializeField] private GameObject[] objPhone;
-    [SerializeField] private Camera camera;
+    [SerializeField] private PhysicPlatform[] platforms;
+
     public static bool gameStart { private set; get; }
 
-    void Start()
+    private void Start()
     {
         hubConnection = new HubConnectionBuilder()
-            .WithUrl("https://localhost:44316/zoom").Build();
-        Connect();
-        hubConnection.On<bool>("Kill", (stat) => Debug.Log(stat));
-        Thread.Sleep(5000);
-        hubConnection.SendAsync("Kill");
-        
-        if (!isTvBild)
-        {
-            camera.cullingMask = 0;
-        }
+            .WithUrl(URL)
+            .Build();
 
-        if (PhotonNetwork.IsConnected)
-        {
-            OnConnectedToMaster();
-        }
-        else
-        {
-            PhotonNetwork.GameVersion = version;
-            PhotonNetwork.AutomaticallySyncScene = true;
-            PhotonNetwork.ConnectUsingSettings();
-        }
+        Connect();
+
+        hubConnection.On<string>("OutsideLog", (msg) => Debug.Log(msg));
+        hubConnection.On<int, int>("SetDirection",(id, direction) => platforms[id].SetDirection((MoveDirection)direction));
+        hubConnection.On("StartGame", () => gameStart = true);
+        hubConnection.On("RestartGame", () => ResetGame());
+        hubConnection.On<string>("SetID", id => tvID = id);
+
+        hubConnection.SendAsync("ConnectTV");
     }
 
     private static async Task Connect() //Connect to server.
     {
-        await hubConnection.StartAsync();
-    }
-
-    public override void OnConnectedToMaster()
-    {
-        if (isTvBild)
+        await hubConnection.StartAsync().ContinueWith(task =>
         {
-            PhotonNetwork.CreateRoom(nameTV, new Photon.Realtime.RoomOptions { MaxPlayers = 3 });
-        }
-        else
-        {
-            PhotonNetwork.JoinRandomRoom();
-        }
-    }
-
-    public override void OnJoinRandomFailed(short returnCode, string message)
-    {
-        Debug.LogError($"Ошибка при входе в комнату: {message}");
-    }
-
-    public override void OnJoinedRoom()
-    {
-        Debug.LogError($"Join room. Count players {PhotonNetwork.CurrentRoom.PlayerCount}");
-
-        if (PhotonNetwork.IsMasterClient && PhotonNetwork.CurrentRoom.PlayerCount < 3)
-        {
-            for (int i = 0; i < objTV.Length; ++i)
+            if (task.IsFaulted)
             {
-                objTV[i].SetActive(true);
+                Debug.LogError("Cant connect");
+                //Application.Quit();
             }
-            for (int i = 0; i < objPhone.Length; ++i)
+            else
             {
-                objPhone[i].SetActive(false);
-            }
-        }
-        else if (!PhotonNetwork.IsMasterClient)
-        {
-            GameObject platform = PhotonNetwork.Instantiate(platformPlayer.name, spawns[PhotonNetwork.CurrentRoom.PlayerCount - 2].position, Quaternion.identity);
-
-            for (int i = 0; i < objTV.Length; ++i)
-            {
-                objTV[i].SetActive(false);
-            }
-            for (int i = 0; i < objPhone.Length; ++i)
-            {
-                objPhone[i].SetActive(true);
-            }
-
-            if (PhotonNetwork.CurrentRoom.PlayerCount == 3)
-            {
+                Debug.Log("Connected");
                 gameStart = true;
             }
-        }
+        });
     }
 
-    public override void OnPlayerEnteredRoom(Player newPlayer)  //Вызываеться, когда кто то заходит, тут запускаем игру если 3 человека в руме
+    private void ResetGame()
     {
-        Debug.Log($"Count ppl in room {PhotonNetwork.CurrentRoom.PlayerCount}");
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 3)
+        foreach (var platform in platforms)
         {
-            gameStart = true;
-            PhotonNetwork.CurrentRoom.IsVisible = false;
-            for (int i = 0; i < objTV.Length; ++i)
-            {
-                objTV[i].SetActive(false);
-            }
+            platform.Reset();
         }
-    }
-
-    public override void OnPlayerLeftRoom(Player otherPlayer)
-    {
-        EndGame();
-    }
-
-    private void loadLevel(int num)
-    {
-        PhotonNetwork.LoadLevel(1);
-    }
-
-    public void EndGame()
-    {
-        PhotonNetwork.LeaveRoom();
-    }
-
-    public override void OnLeftRoom()
-    {
-        PhotonNetwork.Disconnect();
-        Debug.Log("Вышел с румы");
-    }
-
-    public override void OnDisconnected(DisconnectCause cause)
-    {
-        SceneManager.LoadScene(isTvBild ? 0 : 1);
     }
 }
