@@ -1,132 +1,99 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.IO;
 using UnityEngine;
-using Photon.Pun;
-using Photon.Realtime;
-using UnityEngine.SceneManagement;
-using System.ComponentModel;
-using System.Xml;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.SignalR.Client;
+using UnityEngine.Events;
 
-public class Network : MonoBehaviourPunCallbacks
+public class Network : MonoBehaviour
 {
-    [SerializeField] private bool isTvBild = false;
-    [SerializeField] private GameObject platformPlayer;
-    [SerializeField] private string version = "1.0";
-    [SerializeField] private string nameTV = "tv";
-    [SerializeField] private Transform[] spawns;
-    [SerializeField] private GameObject[] objTV;
-    [SerializeField] private GameObject[] objPhone;
-    [SerializeField] private inputButtons buttons;
-    [SerializeField] private Ball ball;
-    [SerializeField] private Camera camera;
-    private static bool played = false;
+    private static HubConnection hubConnection;
+    [SerializeField] private string phoneUrl;
+    [SerializeField] private string URL;
+    [SerializeField] private PhysicPlatform[] platforms;
+    [HideInInspector] public ConnectionEvent onConnection;
+    [HideInInspector] public UnityEvent onGameStart;
+    [HideInInspector] public UnityEvent onGameStop;
+    [HideInInspector] public UnityEvent onUserActions;
+    private Settings settings = new Settings();
 
-    void Start()
+    public static bool gameStart { private set; get; }
+
+    private void Awake()
     {
-        if (!isTvBild)
+        Setup(ref settings);
+        onGameStart.AddListener(() => gameStart = true);
+        onGameStop.AddListener(() =>
         {
-            camera.cullingMask = 0;
-        }
+            gameStart = false;
+            Application.Quit();
+        });
+        onConnection.AddListener((url) => Debug.Log(url));
+    }
 
-        if (PhotonNetwork.IsConnected)
+    private void Start()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(settings.serverURL)
+            .Build();
+
+        Connect();
+
+        hubConnection.On<string>("OutsideLog", (msg) => Debug.Log($"Outside Log: {msg}"));
+        hubConnection.On<int, float>("SetDirection",(id, direction) =>
         {
-            OnConnectedToMaster();
+            platforms[id].SetDirection(direction);
+            onUserActions.Invoke();
+        });
+        hubConnection.On("StartGame", () => onGameStart.Invoke());
+        hubConnection.On("StopGame", () => onGameStop.Invoke());
+        hubConnection.On<string>("SetID", id => onConnection.Invoke($"{settings.phoneURL}#{id}"));
+
+        hubConnection.SendAsync("ConnectTV");
+    }
+
+    private static async Task Connect() //Connect to server.
+    {
+        await hubConnection.StartAsync().ContinueWith(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("Cant connect");
+                Application.Quit();
+            }
+            else
+            {
+                Debug.Log("Connected");
+            }
+        });
+    }
+
+    private void ResetGame()
+    {
+        foreach (var platform in platforms)
+        {
+            platform.Reset();
+        }
+    }
+
+    private void Setup(ref Settings settings)
+    {
+        string path = Directory.GetCurrentDirectory() + "/settings.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            settings = JsonUtility.FromJson<Settings>(json);
         }
         else
         {
-            PhotonNetwork.GameVersion = version;
-            PhotonNetwork.AutomaticallySyncScene = true;
-            PhotonNetwork.ConnectUsingSettings();
+            settings.phoneURL = phoneUrl;
+            settings.serverURL = URL;
+            File.WriteAllText(path, JsonUtility.ToJson(settings));
         }
     }
+}
 
-    public override void OnConnectedToMaster()
-    {
-        if (isTvBild)
-        {
-            PhotonNetwork.CreateRoom(nameTV, new Photon.Realtime.RoomOptions { MaxPlayers = 3 });
-        }
-        else
-        {
-            PhotonNetwork.JoinRandomRoom();
-        }
-    }
+[System.Serializable]
+public class ConnectionEvent : UnityEvent<string> //link string
+{
 
-    public override void OnJoinRandomFailed(short returnCode, string message)
-    {
-        Debug.LogError($"Ошибка при входе в комнату: {message}");
-    }
-
-    public override void OnJoinedRoom()
-    {
-        Debug.LogError($"Join room. Count players {PhotonNetwork.CurrentRoom.PlayerCount}");
-
-        if (PhotonNetwork.IsMasterClient && PhotonNetwork.CurrentRoom.PlayerCount < 3)
-        {
-            for (int i = 0; i < objTV.Length; ++i)
-            {
-                objTV[i].SetActive(true);
-            }
-            for (int i = 0; i < objPhone.Length; ++i)
-            {
-                objPhone[i].SetActive(false);
-            }
-        }
-        else if (!PhotonNetwork.IsMasterClient)
-        {
-            for (int i = 0; i < objTV.Length; ++i)
-            {
-                objTV[i].SetActive(false);
-            }
-            for (int i = 0; i < objPhone.Length; ++i)
-            {
-                objPhone[i].SetActive(true);
-            }
-        }
-
-        if (PhotonNetwork.LocalPlayer.ActorNumber != 1)
-        {
-            GameObject platform = PhotonNetwork.Instantiate(platformPlayer.name, spawns[3 - PhotonNetwork.LocalPlayer.ActorNumber].position, Quaternion.identity);
-            buttons.SetMyPlatform(platform);
-            played = true;
-        }
-    }
-
-    public override void OnPlayerEnteredRoom(Player newPlayer)  //Вызываеться, когда кто то заходит, тут запускаем игру если 3 человека в руме
-    {
-        Debug.Log($"Count ppl in room {PhotonNetwork.CurrentRoom.PlayerCount}");
-        if (PhotonNetwork.CurrentRoom.PlayerCount == 3)
-        {
-            for (int i = 0; i < objTV.Length; ++i)
-            {
-                objTV[i].SetActive(false);
-            }
-        }
-    }
-
-    public override void OnPlayerLeftRoom(Player otherPlayer)
-    {
-        EndGame();
-    }
-
-    private void loadLevel(int num)
-    {
-        PhotonNetwork.LoadLevel(1);
-    }
-
-    public void EndGame()
-    {
-        PhotonNetwork.LeaveRoom();
-    }
-
-    public override void OnLeftRoom()
-    {
-        PhotonNetwork.Disconnect();
-        Debug.Log("Вышел с румы");
-    }
-
-    public override void OnDisconnected(DisconnectCause cause)
-    {
-        SceneManager.LoadScene(isTvBild ? 0 : 1);
-    }
 }

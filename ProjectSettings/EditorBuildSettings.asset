@@ -6,9 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MainScene.unity
-    guid: 2cda990e2423bbf4892e6590ba056729
-  - enabled: 1
-    path: Assets/Scenes/afterLeaveScene.unity
-    guid: f8dc428027852ed4397df671529ed751
+    path: Assets/Scenes/BallTest.unity
+    guid: d1c71b37b99b7e24dac5b3b44e240515
   m_configObjects: {}
