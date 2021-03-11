@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
 using UnityEngine.Events;
@@ -12,11 +13,13 @@ public class Network : MonoBehaviour
     [HideInInspector] public ConnectionEvent onConnection;
     [HideInInspector] public UnityEvent onGameStart;
     [HideInInspector] public UnityEvent onGameStop;
+    private Settings settings = new Settings();
 
     public static bool gameStart { private set; get; }
 
     private void Awake()
     {
+        Setup(ref settings);
         onGameStart.AddListener(() => gameStart = true);
         onGameStop.AddListener(() =>
         {
@@ -29,7 +32,7 @@ public class Network : MonoBehaviour
     private void Start()
     {
         hubConnection = new HubConnectionBuilder()
-            .WithUrl(URL)
+            .WithUrl(settings.serverURL)
             .Build();
 
         Connect();
@@ -38,7 +41,7 @@ public class Network : MonoBehaviour
         hubConnection.On<int, float>("SetDirection",(id, direction) => platforms[id].SetDirection(direction));
         hubConnection.On("StartGame", () => onGameStart.Invoke());
         hubConnection.On("StopGame", () => onGameStop.Invoke());
-        hubConnection.On<string>("SetID", id => onConnection.Invoke($"{phoneUrl}#{id}"));
+        hubConnection.On<string>("SetID", id => onConnection.Invoke($"{settings.phoneURL}#{id}"));
 
         hubConnection.SendAsync("ConnectTV");
     }
@@ -64,6 +67,22 @@ public class Network : MonoBehaviour
         foreach (var platform in platforms)
         {
             platform.Reset();
+        }
+    }
+
+    private void Setup(ref Settings settings)
+    {
+        string path = Directory.GetCurrentDirectory() + "/settings.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            settings = JsonUtility.FromJson<Settings>(json);
+        }
+        else
+        {
+            settings.phoneURL = phoneUrl;
+            settings.serverURL = URL;
+            File.WriteAllText(path, JsonUtility.ToJson(settings));
         }
     }
 }
