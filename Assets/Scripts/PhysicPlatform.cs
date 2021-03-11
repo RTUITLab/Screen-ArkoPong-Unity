@@ -1,18 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PhysicPlatform : MonoBehaviour
 {
-    private MoveDirection currDirection = MoveDirection.Stay;
+    private float currDirectionSpeed = 0;   //from -1 to 1
     private Rigidbody2D rigidbody;
     private bool collisionDown;
     private bool collisionUp;
 
-    private Vector2 upVector2Vel = new Vector2(0f, 10f);
-    private Vector2 downVector2Vel = new Vector2(0f, -10f);
-    private Vector2 stayVector2Vel = new Vector2(0,0);
+    private Vector2 Vector2Vel = new Vector2(0f, 10f);
     private Vector3 startPos;
 
     private void Awake()
@@ -29,15 +25,15 @@ public class PhysicPlatform : MonoBehaviour
 
     private Vector2 GetCurrentVelocity()
     {
-        if (currDirection == MoveDirection.Up && !collisionUp)
+        if (currDirectionSpeed > 0 && !collisionUp)
         {
-            return upVector2Vel;
+            return Vector2Vel * currDirectionSpeed;
         }
-        else if (currDirection == MoveDirection.Down && !collisionDown)
+        else if (currDirectionSpeed < 0 && !collisionDown)
         {
-            return downVector2Vel;
+            return Vector2Vel * currDirectionSpeed;
         }
-        return stayVector2Vel;
+        return Vector2.zero;
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -66,9 +62,9 @@ public class PhysicPlatform : MonoBehaviour
         }
     }
 
-    public void SetDirection(MoveDirection direction)
+    public void SetDirection(float directionSpeed)
     {
-        currDirection = direction;
+        currDirectionSpeed = directionSpeed;
     }
 
     public void Reset()

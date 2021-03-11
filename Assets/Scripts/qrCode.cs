@@ -13,7 +13,7 @@ public class qrCode : MonoBehaviour
     private void Awake()
     {
         image = GetComponent<RawImage>();
-        GenerateQR(startText);
+        //GenerateQR(startText);  //Test
     }
 
     public void GenerateQR(string text)

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.Versioning;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class TextScore : MonoBehaviour
@@ -33,7 +29,7 @@ public class TextScore : MonoBehaviour
         }
         private set
         {
-            _leftCount = value;
+            _RightCount = value;
             updScore();
         }
     }
@@ -51,10 +47,5 @@ public class TextScore : MonoBehaviour
     private void updScore()
     {
         text.text = $"{leftCount}:{RightCount}";
-    }
-
-    public void Reset()
-    {
-        leftCount = RightCount = 0;
     }
 }

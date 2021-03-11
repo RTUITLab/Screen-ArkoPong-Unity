@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class BallController : MonoBehaviour
 {
-
-
+    [SerializeField] private Network network;
+    [SerializeField] private TextScore TextScore;
     // КУСОК КОСТЫЛЯ
 
     [SerializeField]
@@ -15,17 +15,20 @@ public class BallController : MonoBehaviour
     private GameObject[] instance = new GameObject[2];
     private int indx = 0;
 
-    void Start()
+    private void Awake()
     {
-        ballDestroyed();
-        ballDestroyed();
+        network.onGameStart.AddListener(() =>
+        {
+            ballDestroyed();
+            ballDestroyed();
+        });
     }
 
     public void ballDestroyed()
     {
-        instance[indx % instance.Length] = Instantiate(ball1Prefab, new Vector3(0, 0), Quaternion.Euler(0f, 0f, 0f));
-        instance[indx % instance.Length].GetComponent<Ball>().addForce();
-        instance[indx % instance.Length].GetComponent<Ball>().controller = this;
+        int index = indx % instance.Length;
+        instance[index] = Instantiate(ball1Prefab, new Vector3(0, 0), Quaternion.Euler(0f, 0f, 0f));
+        instance[index].GetComponent<Ball>().OnSpawn(TextScore, this);
         indx++;
     }
 

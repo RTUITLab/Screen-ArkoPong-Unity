@@ -2,14 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class Ball : MonoBehaviour
 {
     [SerializeField] private int speed = 0;
-    [SerializeField] private TextScore textScore;
+    private TextScore textScore;
+    private BallController controller;
 
-    public BallController controller;
+    public void OnSpawn(TextScore textScore, BallController controller)
+    {
+        this.textScore = textScore;
+        this.controller = controller;
+        addForce();
+    }
 
     //Массив возможных сил, которые рандомно назначаются объекту при начале игры или же полсе пропущенного гола
     private Vector2[] initialForces = {new Vector2(100f, 100f), new Vector2(-100f, -100f), new Vector2(-100f, 100f), new Vector2(100f, -100f)};
@@ -21,6 +28,14 @@ public class Ball : MonoBehaviour
         {
             controller.ballDestroyed();
             Destroy(gameObject);
+            if (collision.gameObject.name == "LeftWall")
+            {
+                textScore.AddRight();
+            }
+            else
+            {
+                textScore.AddLeft();
+            }
         }
     }
 
