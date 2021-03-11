@@ -7,17 +7,25 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.AspNetCore.SignalR.Client;
+using UnityEngine.Events;
 
 public class Network : MonoBehaviour
 {
     private static HubConnection hubConnection;
-    private string tvID = null;
-    [SerializeField] private TextScore textScore;
+    [SerializeField] private string phoneUrl;
     [SerializeField] private string URL;
     [SerializeField] private Transform[] spawns;
     [SerializeField] private PhysicPlatform[] platforms;
+    public ConnectionEvent onConnection;
+    public UnityEvent onGameStart;
+    public UnityEvent onGameStop;
 
     public static bool gameStart { private set; get; }
+
+    private void Awake()
+    {
+
+    }
 
     private void Start()
     {
@@ -29,9 +37,9 @@ public class Network : MonoBehaviour
 
         hubConnection.On<string>("OutsideLog", (msg) => Debug.Log(msg));
         hubConnection.On<int, int>("SetDirection",(id, direction) => platforms[id].SetDirection((MoveDirection)direction));
-        hubConnection.On("StartGame", () => gameStart = true);
-        hubConnection.On("RestartGame", () => ResetGame());
-        hubConnection.On<string>("SetID", id => tvID = id);
+        hubConnection.On("StartGame", () => onGameStart.Invoke());
+        hubConnection.On("StopGame", () => onGameStop.Invoke());
+        hubConnection.On<string>("SetID", id => onConnection.Invoke($"{phoneUrl}#{id}"));
 
         hubConnection.SendAsync("ConnectTV");
     }
@@ -48,7 +56,6 @@ public class Network : MonoBehaviour
             else
             {
                 Debug.Log("Connected");
-                gameStart = true;
             }
         });
     }
@@ -60,4 +67,10 @@ public class Network : MonoBehaviour
             platform.Reset();
         }
     }
+}
+
+[System.Serializable]
+public class ConnectionEvent : UnityEvent<string> //link string
+{
+
 }
