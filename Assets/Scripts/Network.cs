@@ -14,9 +14,11 @@ public class Network : MonoBehaviour
     [HideInInspector] public UnityEvent onGameStart;
     [HideInInspector] public UnityEvent onGameStop;
     [HideInInspector] public UnityEvent onUserActions;
+    [HideInInspector] public UnityEvent onPlayerJoin;
     private Settings settings = new Settings();
 
     public static bool gameStart { private set; get; }
+    public byte needPlayers { get; private set; }
 
     private void Awake()
     {
@@ -28,6 +30,7 @@ public class Network : MonoBehaviour
             Application.Quit();
         });
         onConnection.AddListener((url) => Debug.Log(url));
+        needPlayers = 2;
     }
 
     private void Start()
@@ -44,9 +47,17 @@ public class Network : MonoBehaviour
             platforms[id].SetDirection(direction);
             onUserActions.Invoke();
         });
-        hubConnection.On("StartGame", () => onGameStart.Invoke());
         hubConnection.On("StopGame", () => onGameStop.Invoke());
         hubConnection.On<string>("SetID", id => onConnection.Invoke($"{settings.phoneURL}#{id}"));
+        hubConnection.On("PlayerJoin", () =>
+        {
+            if (--needPlayers == 0)
+            {
+                onGameStart.Invoke();
+                return;
+            }
+            onPlayerJoin.Invoke();
+        });
 
         hubConnection.SendAsync("ConnectTV");
     }
