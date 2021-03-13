@@ -2,9 +2,9 @@
 
 ## Instruction manual ##
 
-* Download the latest version of the game [here][Releases] or build the project yourself.
+* Download the latest version of the game [here][Releases] or build the project yourself;
 * Download and run your [game server][Server];
-* Configure connection parameters in the settings.json file. 
+* Configure connection parameters in the `settings.json` file. 
 
 > If you build the project yourself, the `settings.json` file will be created during the first application run.
 
