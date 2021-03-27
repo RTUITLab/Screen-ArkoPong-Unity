@@ -88,7 +88,7 @@ public class Network : MonoBehaviour
 
     private void Setup(ref Settings settings)
     {
-        string path = Directory.GetCurrentDirectory() + "/settings.json";
+        string path = Path.Combine(Application.dataPath, "settings.json");
         if (File.Exists(path))
         {
             string json = File.ReadAllText(path);
