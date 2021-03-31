@@ -929,7 +929,7 @@ GameObject:
   - component: {fileID: 1117937853}
   - component: {fileID: 1117937852}
   m_Layer: 0
-  m_Name: TopWall (1)
+  m_Name: TopWall
   m_TagString: Finish
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
