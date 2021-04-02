@@ -89,6 +89,11 @@ public class Network : MonoBehaviour
     private void Setup(ref Settings settings)
     {
         string path = Path.Combine(Application.dataPath, "settings.json");
+
+#if UNITY_EDITOR
+        path = Path.Combine(Directory.GetCurrentDirectory(), "settings.json");
+#endif
+
         if (File.Exists(path))
         {
             string json = File.ReadAllText(path);
