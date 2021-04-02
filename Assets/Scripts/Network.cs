@@ -6,7 +6,7 @@ using UnityEngine.Events;
 
 public class Network : MonoBehaviour
 {
-    private static HubConnection hubConnection;
+    public static HubConnection hubConnection { private set; get; }
     [SerializeField] private string phoneURL;
     [SerializeField] private string serverURL;
     [SerializeField] private PhysicPlatform[] platforms;
@@ -31,14 +31,14 @@ public class Network : MonoBehaviour
         });
         onConnection.AddListener((url) => Debug.Log(url));
         needPlayers = 2;
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(settings.serverURL)
+            .Build();
     }
 
     private void Start()
     {
-        hubConnection = new HubConnectionBuilder()
-            .WithUrl(settings.serverURL)
-            .Build();
-
         Connect();
 
         hubConnection.On<string>("OutsideLog", (msg) => Debug.Log($"Outside Log: {msg}"));
