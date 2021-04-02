@@ -7,22 +7,22 @@ using UnityEngine.Events;
 public class Network : MonoBehaviour
 {
     private static HubConnection hubConnection;
-    [SerializeField] private string phoneUrl;
-    [SerializeField] private string URL;
+    [SerializeField] private string phoneURL;
+    [SerializeField] private string serverURL;
     [SerializeField] private PhysicPlatform[] platforms;
     [HideInInspector] public ConnectionEvent onConnection;
     [HideInInspector] public UnityEvent onGameStart;
     [HideInInspector] public UnityEvent onGameStop;
     [HideInInspector] public UnityEvent onUserActions;
     [HideInInspector] public UnityEvent onPlayerJoin;
-    private Settings settings = new Settings();
+    private Settings settings;
 
     public static bool gameStart { private set; get; }
     public byte needPlayers { get; private set; }
 
     private void Awake()
     {
-        Setup(ref settings);
+        settings = new Settings(phoneURL, serverURL);
         onGameStart.AddListener(() => gameStart = true);
         onGameStop.AddListener(() =>
         {
@@ -83,27 +83,6 @@ public class Network : MonoBehaviour
         foreach (var platform in platforms)
         {
             platform.Reset();
-        }
-    }
-
-    private void Setup(ref Settings settings)
-    {
-        string path = Path.Combine(Application.dataPath, "settings.json");
-
-#if UNITY_EDITOR
-        path = Path.Combine(Directory.GetCurrentDirectory(), "settings.json");
-#endif
-
-        if (File.Exists(path))
-        {
-            string json = File.ReadAllText(path);
-            settings = JsonUtility.FromJson<Settings>(json);
-        }
-        else
-        {
-            settings.phoneURL = phoneUrl;
-            settings.serverURL = URL;
-            File.WriteAllText(path, JsonUtility.ToJson(settings));
         }
     }
 }
