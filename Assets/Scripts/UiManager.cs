@@ -28,10 +28,5 @@ public class UiManager : MonoBehaviour
             ConnectionUi.SetActive(false);
             inGameUi.SetActive(true);
         });
-        network.onGameStop.AddListener(() =>
-        {
-            ConnectionUi.SetActive(true);
-            inGameUi.SetActive(false);
-        });
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine.Events;
 
 public class Network : MonoBehaviour
 {
+    public static Network instance { private set; get; }
     public static HubConnection hubConnection { private set; get; }
     [SerializeField] private string phoneURL;
     [SerializeField] private string serverURL;
@@ -22,11 +23,11 @@ public class Network : MonoBehaviour
 
     private void Awake()
     {
+        instance = this;
         settings = new Settings(phoneURL, serverURL);
         onGameStart.AddListener(() => gameStart = true);
         onGameStop.AddListener(() =>
         {
-            gameStart = false;
             Application.Quit();
         });
         onConnection.AddListener((url) => Debug.Log(url));
