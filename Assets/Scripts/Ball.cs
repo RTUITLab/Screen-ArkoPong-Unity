@@ -9,6 +9,20 @@ public class Ball : MonoBehaviour
     private int remainingTime;
     private TextScore textScore;
     private BallController controller;
+    private Rigidbody2D rigidbody;
+        
+    private void Awake()
+    {
+        rigidbody = gameObject.GetComponent<Rigidbody2D>();
+        Network.instance.onGamePaused.AddListener(() =>
+        {
+            rigidbody.simulated = false;
+        });
+        Network.instance.onGameStart.AddListener(() =>
+        {
+            rigidbody.simulated = true;
+        });
+    }
 
     public void OnSpawn(TextScore textScore, BallController controller)
     {
@@ -23,8 +37,9 @@ public class Ball : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        clearTime();
         // При попадании в левую и правую стены ставим мяч в центр и снова запускаем
-        if(collision.gameObject.name == "LeftWall" || collision.gameObject.name == "RightWall")
+        if (collision.gameObject.name == "LeftWall" || collision.gameObject.name == "RightWall")
         {
             if (collision.gameObject.name == "LeftWall")
             {
@@ -36,7 +51,6 @@ public class Ball : MonoBehaviour
             }
             RemoveBall();
         }
-        clearTime();
     }
 
     public void addForce()
@@ -56,7 +70,7 @@ public class Ball : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(1f);
-            if (--timeToLive == 0)
+            if (--remainingTime == 0)
             {
                 RemoveBall();
             }

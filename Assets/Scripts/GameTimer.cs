@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +18,15 @@ public class GameTimer : MonoBehaviour
     {
         MaxTimeSeconds = Minutes * 60;
         remainingTimeSeconds = MaxTimeSeconds;
-        network.onUserActions.AddListener(() => remainingTimeSeconds = Minutes * 60);
+        network.onUserActions.AddListener(() => remainingTimeSeconds = MaxTimeSeconds);
+        Network.instance.onGamePaused.AddListener(() =>
+        {
+            remainingTimeSeconds = 10;
+        });
+        Network.instance.onPlayerJoin.AddListener(() =>
+        {
+            remainingTimeSeconds = MaxTimeSeconds;
+        });
     }
 
     private void Start()

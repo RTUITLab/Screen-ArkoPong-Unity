@@ -1474,8 +1474,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83e28cd1ab2538241bb9923400f47be0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  phoneUrl: http://localhost:5000/index.html
-  URL: http://localhost:5000/pong
+  phoneURL: http://localhost:5000/index.html
+  serverURL: http://localhost:5000/pong
   platforms:
   - {fileID: 809092984}
   - {fileID: 276297695}
