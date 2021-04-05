@@ -9,6 +9,20 @@ public class Ball : MonoBehaviour
     private int remainingTime;
     private TextScore textScore;
     private BallController controller;
+    private Rigidbody2D rigidbody;
+        
+    private void Awake()
+    {
+        rigidbody = gameObject.GetComponent<Rigidbody2D>();
+        Network.instance.onGamePaused.AddListener(() =>
+        {
+            rigidbody.simulated = false;
+        });
+        Network.instance.onGameStart.AddListener(() =>
+        {
+            rigidbody.simulated = true;
+        });
+    }
 
     public void OnSpawn(TextScore textScore, BallController controller)
     {

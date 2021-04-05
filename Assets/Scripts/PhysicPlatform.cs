@@ -38,7 +38,7 @@ public class PhysicPlatform : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log($"CollisionEnter {collision.gameObject.name}");
+        //Debug.Log($"CollisionEnter {collision.gameObject.name}");
         if(collision.gameObject.name == "BottomWall")
         {
             collisionDown = true;
@@ -51,7 +51,7 @@ public class PhysicPlatform : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        Debug.Log($"CollisionExit {collision.gameObject.name}");
+        //Debug.Log($"CollisionExit {collision.gameObject.name}");
         if (collision.gameObject.name == "BottomWall")
         {
             collisionDown = false;

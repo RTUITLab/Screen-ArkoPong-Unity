@@ -14,13 +14,18 @@ public class BallController : MonoBehaviour
 
     private GameObject[] instance = new GameObject[2];
     private int indx = 0;
+    private bool spawned = false;
 
     private void Awake()
     {
         network.onGameStart.AddListener(() =>
         {
-            ballDestroyed();
-            ballDestroyed();
+            if (!spawned)
+            {
+                ballDestroyed();
+                ballDestroyed();
+                spawned = true;
+            }
         });
     }
 

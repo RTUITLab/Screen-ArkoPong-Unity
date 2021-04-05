@@ -1,5 +1,4 @@
-﻿using System.IO;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Client;
 using UnityEngine.Events;
@@ -7,12 +6,13 @@ using UnityEngine.Events;
 public class Network : MonoBehaviour
 {
     public static Network instance { private set; get; }
-    public static HubConnection hubConnection { private set; get; }
+    private static HubConnection hubConnection;
     [SerializeField] private string phoneURL;
     [SerializeField] private string serverURL;
     [SerializeField] private PhysicPlatform[] platforms;
     [HideInInspector] public ConnectionEvent onConnection;
     [HideInInspector] public UnityEvent onGameStart;
+    [HideInInspector] public UnityEvent onGamePaused;
     [HideInInspector] public UnityEvent onGameStop;
     [HideInInspector] public UnityEvent onUserActions;
     [HideInInspector] public UnityEvent onPlayerJoin;
@@ -25,11 +25,25 @@ public class Network : MonoBehaviour
     {
         instance = this;
         settings = new Settings(phoneURL, serverURL);
-        onGameStart.AddListener(() => gameStart = true);
+        onGameStart.AddListener(() =>
+        {
+            Debug.Log("Game start");
+            gameStart = true;
+        });
+        onGamePaused.AddListener(() =>
+        {
+            Debug.Log("Game paused");
+        });
         onGameStop.AddListener(() =>
         {
+            Debug.Log("Game stop");
             Application.Quit();
         });
+        onPlayerJoin.AddListener((() =>
+        {
+            Debug.Log("Player join");
+            --needPlayers;
+        }));
         onConnection.AddListener((url) => Debug.Log(url));
         needPlayers = 2;
 
@@ -49,15 +63,23 @@ public class Network : MonoBehaviour
             onUserActions.Invoke();
         });
         hubConnection.On("StopGame", () => onGameStop.Invoke());
+        hubConnection.On("PauseGame", () => onGamePaused.Invoke());
+        hubConnection.On("StartGame", () => onGameStart.Invoke());
         hubConnection.On<string>("SetID", id => onConnection.Invoke($"{settings.phoneURL}#{id}"));
-        hubConnection.On("PlayerJoin", () =>
+        hubConnection.On("PlayerJoin", () => onPlayerJoin.Invoke());
+
+        hubConnection.On("PlayerLeft", () =>
         {
-            if (--needPlayers == 0)
+            Debug.Log("Player left");
+            ++needPlayers;
+            if (needPlayers == 2)
             {
-                onGameStart.Invoke();
-                return;
+                onGameStop.Invoke();
             }
-            onPlayerJoin.Invoke();
+            else
+            {
+                onGamePaused.Invoke();
+            }
         });
 
         hubConnection.SendAsync("ConnectTV");
@@ -77,14 +99,6 @@ public class Network : MonoBehaviour
                 Debug.Log("Connected");
             }
         });
-    }
-
-    private void ResetGame()
-    {
-        foreach (var platform in platforms)
-        {
-            platform.Reset();
-        }
     }
 }
 

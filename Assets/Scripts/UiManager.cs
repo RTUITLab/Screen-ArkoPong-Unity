@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 public class UiManager : MonoBehaviour
 {
-    [SerializeField] private Network network;
     [SerializeField] private qrCode qr;
     [SerializeField] private TextScore score;
     [SerializeField] private Text playerNotifyre;
@@ -15,18 +11,28 @@ public class UiManager : MonoBehaviour
 
     private void Awake()
     {
-        network.onConnection.AddListener((link) => qr.GenerateQR(link));
-        network.onPlayerJoin.AddListener(() =>
+        Network.instance.onConnection.AddListener((link) => qr.GenerateQR(link));
+        Network.instance.onPlayerJoin.AddListener(() =>
         {
-            if (network.needPlayers == 1)
+            if (Network.instance.needPlayers == 1)
             {
                 playerNotifyre.text = "Ожидание 1 игрока";
             }
         });
-        network.onGameStart.AddListener(() =>
+        Network.instance.onGameStart.AddListener(() =>
         {
             ConnectionUi.SetActive(false);
             inGameUi.SetActive(true);
+        });
+        Network.instance.onGamePaused.AddListener(() =>
+        {
+            playerNotifyre.text = "Игра приостановлена";
+            ConnectionUi.SetActive(true);
+            inGameUi.SetActive(false);
+        });
+        Network.instance.onGameStop.AddListener(() =>
+        {
+            playerNotifyre.text = "Выход из игры";
         });
     }
 }
