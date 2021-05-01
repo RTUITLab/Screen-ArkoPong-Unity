@@ -1,4 +1,4 @@
-# Screen-ArkoPong #
+# Screen-ArkoPong-Unity #
 
 ## Instruction manual ##
 
