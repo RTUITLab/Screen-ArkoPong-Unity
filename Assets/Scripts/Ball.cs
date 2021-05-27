@@ -4,16 +4,23 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class Ball : MonoBehaviour
 {
+    [Header("Ball parts:")] 
+    [SerializeField] private Rigidbody2D rigidbody;
+    [SerializeField] private CircleCollider2D collider;
+    [SerializeField] private SpriteRenderer sprite;
+
+    [Header("Settings:")]
     [SerializeField] private int speed = 0;
     [SerializeField] [Range(5, 30)] private int timeToLive = 5; //Seconds
+    [SerializeField] private AudioSource audioSourceDeath;
+    [SerializeField] private AudioSource audioSourceBonk;
+
     private int remainingTime;
     private TextScore textScore;
     private BallController controller;
-    private Rigidbody2D rigidbody;
         
     private void Awake()
     {
-        rigidbody = gameObject.GetComponent<Rigidbody2D>();
         Network.instance.onGamePaused.AddListener(() =>
         {
             rigidbody.simulated = false;
@@ -49,7 +56,19 @@ public class Ball : MonoBehaviour
             {
                 textScore.AddLeft();
             }
-            RemoveBall();
+
+            rigidbody.simulated = false;
+            collider.enabled = false;
+            sprite.enabled = false;
+
+            audioSourceDeath.pitch = Random.Range(1f, 1.5f);
+            audioSourceDeath.Play();
+            Invoke("RemoveBall", 1f);
+        }
+        else
+        {
+            audioSourceBonk.pitch = Random.Range(1f, 1.5f);
+            audioSourceBonk.Play();
         }
     }
 
